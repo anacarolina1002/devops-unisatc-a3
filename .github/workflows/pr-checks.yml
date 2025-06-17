@@ -7,84 +7,48 @@ on:
     branches: [master]
 
 jobs:
-  build:
+  test-e2e:
     runs-on: ubuntu-latest
-    outputs:
-      image-tag: ${{ steps.build.outputs.image-tag }}
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Build Docker image
-      id: build
-      run: |
-        docker build -t local/strapi-app:test .
-        echo "image-tag=local/strapi-app:test" >> $GITHUB_OUTPUT
-    
-    - name: Save Docker image
-      run: docker save -o strapi-image.tar local/strapi-app:test
-      
-    - name: Upload Docker image
-      uses: actions/upload-artifact@v4
-      with:
-        name: strapi-image
-        path: strapi-image.tar
-        retention-days: 1
-
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    
-    services:
-      strapi:
-        image: local/strapi-app:test
-        pull-policy: never
-        ports:
-          - 1337:1337
-        env:
-          NODE_ENV: test
-          DATABASE_FILENAME: .tmp/data.db
-        options: >-
-          --name strapi
-          --health-cmd "wget --no-verbose --tries=1 --spider http://localhost:1337/ || exit 1"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
 
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Download Docker image
-      uses: actions/download-artifact@v4
-      with:
-        name: strapi-image
-        path: ./docker-images
-    
-    - name: Load Docker image
+
+    - name: Set up Docker
+      run: docker --version
+
+    - name: Build Strapi Docker image
+      run: docker build -t strapi-app:test .
+
+    - name: Run Strapi container
       run: |
-        docker load -i ./docker-images/strapi-image.tar
-        docker images
-    
-    - name: Setup Node.js
+        docker run -d \
+          --name strapi \
+          -p 1337:1337 \
+          -e NODE_ENV=test \
+          -e DATABASE_FILENAME=.tmp/data.db \
+          strapi-app:test
+
+    - name: Wait for Strapi to be ready
+      run: |
+        timeout 180 bash -c 'until curl -s http://localhost:1337/; do sleep 5; done' || \
+          (docker logs strapi && exit 1)
+
+    - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '18'
         cache: 'pnpm'
-    
+
     - name: Install pnpm
       run: npm install -g pnpm
-    
+
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
-    
+
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
-    
-    - name: Wait for Strapi
-      run: |
-        timeout 180 bash -c 'until curl -s http://localhost:1337/; do sleep 5; done' || \
-          (docker logs strapi && exit 1)
-    
-    - name: Run E2E Tests
+
+    - name: Run E2E tests
       run: pnpm test:e2e
       env:
         STRAPI_URL: http://localhost:1337
