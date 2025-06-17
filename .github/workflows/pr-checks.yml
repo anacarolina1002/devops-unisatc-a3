@@ -24,7 +24,7 @@ jobs:
       run: docker save -o strapi-image.tar local/strapi-app:test
       
     - name: Upload Docker image
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: strapi-image
         path: strapi-image.tar
