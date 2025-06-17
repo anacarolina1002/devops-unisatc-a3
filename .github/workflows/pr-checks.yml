@@ -32,7 +32,8 @@ jobs:
 
     - name: Start Strapi in background
       run: |
-        pnpm start
+        pnpm start &
+        echo $! > strapi.pid
       env:
         DATABASE_FILENAME: .tmp/data.db
         APP_KEYS: test
