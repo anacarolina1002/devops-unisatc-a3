@@ -1,0 +1,54 @@
+name: Deploy Terraform Azure
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    defaults:
+      run:
+        working-directory: ./terraform
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.8.3
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Terraform Init
+        run: terraform init -input=false
+        env:
+          ARM_ACCESS_KEY: ${{ secrets.TF_STATE_KEY }}
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -input=false -out=tfplan
+        env:
+          ARM_ACCESS_KEY: ${{ secrets.TF_STATE_KEY }}
+
+      - name: Terraform Apply
+        run: terraform apply -input=false -auto-approve tfplan
+        env:
+          ARM_ACCESS_KEY: ${{ secrets.TF_STATE_KEY }}
+          TF_VAR_app_keys: ${{ secrets.APP_KEYS }}
+          TF_VAR_api_token_salt: ${{ secrets.API_TOKEN_SALT }}
+          TF_VAR_admin_jwt_secret: ${{ secrets.ADMIN_JWT_SECRET }}
+          TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          TF_VAR_dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Terraform Output
+        run: terraform output
