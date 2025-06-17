@@ -44,7 +44,7 @@ jobs:
         JWT_SECRET: test
 
     - name: Wait for Strapi to be ready
-      run: npx wait-on http://localhost:1337
+      run: pnpm wait-on http://localhost:1337
 
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
