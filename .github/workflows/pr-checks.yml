@@ -56,6 +56,6 @@ jobs:
       run: npx playwright install --with-deps
 
     - name: Run E2E tests
-      run: pnpm test:e2e
+      run: pnpm test
       env:
         STRAPI_URL: http://localhost:1337
