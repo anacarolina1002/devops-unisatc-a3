@@ -47,6 +47,13 @@ jobs:
 
     - name: Run seed tests
       run: pnpm seed:example
+      env:
+        DATABASE_FILENAME: .tmp/data.db
+        APP_KEYS: test
+        API_TOKEN_SALT: test
+        ADMIN_JWT_SECRET: test
+        TRANSFER_TOKEN_SALT: test
+        JWT_SECRET: test
 
     - name: Run E2E tests
       run: pnpm test
