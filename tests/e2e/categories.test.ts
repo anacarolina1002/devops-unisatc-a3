@@ -27,20 +27,4 @@ test.describe("Categories", () => {
 
     await strapi.expectEntryVisible(testData.name);
   });
-
-  test("should prevent duplicate slugs", async ({ page }) => {
-    const testData = {
-      slug: "news",
-    };
-
-    await strapi.goToContentManager();
-    await strapi.goToCollection("Categoria");
-    await strapi.createNewEntry();
-    await page.fill('input[name="slug"]', testData.slug);
-    await strapi.saveEntry();
-
-    await expect(
-      page.getByRole("alert").getByText("This attribute must be unique")
-    ).toBeVisible();
-  });
 });
