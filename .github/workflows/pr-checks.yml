@@ -1,0 +1,51 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+jobs:
+  test-e2e:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up pnpm
+      uses: pnpm/action-setup@v3
+      with:
+        version: 10
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Build Strapi app
+      run: pnpm build
+
+    - name: Start Strapi in background
+      run: |
+        pnpm start &
+        echo $! > strapi.pid
+      env:
+        DATABASE_FILENAME: .tmp/data.db
+        APP_KEYS: test
+        API_TOKEN_SALT: test
+        ADMIN_JWT_SECRET: test
+        TRANSFER_TOKEN_SALT: test
+        JWT_SECRET: test
+
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+
+    - name: Run E2E tests
+      run: pnpm test
+      env:
+        STRAPI_URL: http://localhost:1337
