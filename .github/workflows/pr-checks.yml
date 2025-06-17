@@ -35,15 +35,14 @@ jobs:
     runs-on: ubuntu-latest
     
     services:
-      # Serviço do Strapi para os testes
       strapi:
         image: local/strapi-app:test
+        pull-policy: never
         ports:
           - 1337:1337
         env:
           NODE_ENV: test
           DATABASE_FILENAME: .tmp/data.db
-        # Dá tempo para o Strapi iniciar
         options: >-
           --name strapi
           --health-cmd "wget --no-verbose --tries=1 --spider http://localhost:1337/ || exit 1"
@@ -80,7 +79,6 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
     
-    # Aguarda o serviço Strapi estar pronto
     - name: Wait for Strapi
       run: |
         timeout 180 bash -c 'until curl -s http://localhost:1337/; do sleep 5; done' || \
