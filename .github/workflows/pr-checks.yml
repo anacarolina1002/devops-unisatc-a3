@@ -7,14 +7,36 @@ on:
     branches: [master]
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.build.outputs.image-tag }}
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Build Docker image
+      id: build
+      run: |
+        docker build -t local/strapi-app:test .
+        echo "image-tag=local/strapi-app:test" >> $GITHUB_OUTPUT
+    
+    - name: Save Docker image
+      run: docker save -o strapi-image.tar local/strapi-app:test
+      
+    - name: Upload Docker image
+      uses: actions/upload-artifact@v3
+      with:
+        name: strapi-image
+        path: strapi-image.tar
+        retention-days: 1
+
   test:
+    needs: build
     runs-on: ubuntu-latest
     
     services:
       # Serviço do Strapi para os testes
       strapi:
-        name: strapi
-        # Usa o Dockerfile local
         image: local/strapi-app:test
         ports:
           - 1337:1337
@@ -23,6 +45,7 @@ jobs:
           DATABASE_FILENAME: .tmp/data.db
         # Dá tempo para o Strapi iniciar
         options: >-
+          --name strapi
           --health-cmd "wget --no-verbose --tries=1 --spider http://localhost:1337/ || exit 1"
           --health-interval=10s
           --health-timeout=5s
@@ -31,10 +54,16 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    # Constroi a imagem Docker localmente
-    - name: Build Docker image
+    - name: Download Docker image
+      uses: actions/download-artifact@v3
+      with:
+        name: strapi-image
+        path: ./docker-images
+    
+    - name: Load Docker image
       run: |
-        docker build -t local/strapi-app:test .
+        docker load -i ./docker-images/strapi-image.tar
+        docker images
     
     - name: Setup Node.js
       uses: actions/setup-node@v3
