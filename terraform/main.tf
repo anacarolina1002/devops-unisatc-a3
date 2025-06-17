@@ -10,14 +10,14 @@ resource "azurerm_resource_group" "rg" {
 }
 
 resource "azurerm_container_group" "strapi" {
-  name                = "strapi-container"
+  name                = "strapi-container-${random_id.id.hex}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
 
   container {
-    name   = "strapi"
-    image  = "xiristian/strapi-app:latest"
+    name   = "strapi-${random_id.id.hex}"
+    image  = "${var.dockerhub_username}/strapi-app:latest"
     cpu    = "1"
     memory = "1.5"
 
