@@ -26,14 +26,6 @@ test("should create author", async ({ page }) => {
   await page.fill('input[name="name"]', name);
   await page.fill('input[name="email"]', email);
 
-  await page.click('button:has-text("Click to add an asset")');
-  await page.waitForLoadState("networkidle");
-  await page
-    .locator('article:has-text("default-image")')
-    .getByRole("checkbox")
-    .click();
-  await page.click('button:has-text("Finish")');
-
   await page.click('button:has-text("Save")');
   await expect(page.locator(`text=${name}`)).toBeVisible();
 });
