@@ -28,8 +28,6 @@ jobs:
 
       - name: Terraform Init
         run: terraform init -input=false
-        env:
-          ARM_ACCESS_KEY: ${{ secrets.TF_STATE_KEY }}
 
       - name: Terraform Validate
         run: terraform validate
@@ -38,7 +36,6 @@ jobs:
         id: plan
         run: terraform plan -input=false -out=tfplan
         env:
-          ARM_ACCESS_KEY: ${{ secrets.TF_STATE_KEY }}
           TF_VAR_app_keys: ${{ secrets.APP_KEYS }}
           TF_VAR_api_token_salt: ${{ secrets.API_TOKEN_SALT }}
           TF_VAR_admin_jwt_secret: ${{ secrets.ADMIN_JWT_SECRET }}
