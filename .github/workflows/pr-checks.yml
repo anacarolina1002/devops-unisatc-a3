@@ -27,6 +27,10 @@ jobs:
           -e NODE_ENV=test \
           -e DATABASE_FILENAME=.tmp/data.db \
           -e APP_KEYS=test \
+          -e API_TOKEN_SALT=test \
+          -e ADMIN_JWT_SECRET=test \
+          -e TRANSFER_TOKEN_SALT=test \
+          -e JWT_SECRET=test \
           strapi-app:test
 
     - name: Wait for Strapi to be ready
