@@ -2,9 +2,9 @@ name: PR Checks
 
 on:
   pull_request:
-    branches: [master]
+    branches: [main]
   push:
-    branches: [master]
+    branches: [main]
 
 jobs:
   test:
@@ -13,7 +13,9 @@ jobs:
     services:
       # Serviço do Strapi para os testes
       strapi:
-        image: strapi-app:local
+        name: strapi
+        # Usa o Dockerfile local
+        image: local/strapi-app:test
         ports:
           - 1337:1337
         env:
@@ -29,6 +31,11 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
+    # Constroi a imagem Docker localmente
+    - name: Build Docker image
+      run: |
+        docker build -t local/strapi-app:test .
+    
     - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
@@ -43,6 +50,12 @@ jobs:
     
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+    
+    # Aguarda o serviço Strapi estar pronto
+    - name: Wait for Strapi
+      run: |
+        timeout 180 bash -c 'until curl -s http://localhost:1337/; do sleep 5; done' || \
+          (docker logs strapi && exit 1)
     
     - name: Run E2E Tests
       run: pnpm test:e2e
