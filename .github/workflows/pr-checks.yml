@@ -26,6 +26,7 @@ jobs:
           -p 1337:1337 \
           -e NODE_ENV=test \
           -e DATABASE_FILENAME=.tmp/data.db \
+          -e APP_KEYS=test \
           strapi-app:test
 
     - name: Wait for Strapi to be ready
