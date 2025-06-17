@@ -43,7 +43,7 @@ jobs:
           TF_VAR_api_token_salt: ${{ secrets.API_TOKEN_SALT }}
           TF_VAR_admin_jwt_secret: ${{ secrets.ADMIN_JWT_SECRET }}
           TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
-          TF_VAR_dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+          TF_VAR_dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Terraform Apply
         run: terraform apply -input=false -auto-approve tfplan
@@ -53,7 +53,7 @@ jobs:
           TF_VAR_api_token_salt: ${{ secrets.API_TOKEN_SALT }}
           TF_VAR_admin_jwt_secret: ${{ secrets.ADMIN_JWT_SECRET }}
           TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
-          TF_VAR_dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+          TF_VAR_dockerhub_password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Terraform Output
         run: terraform output
