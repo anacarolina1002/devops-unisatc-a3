@@ -1,0 +1,50 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      # Serviço do Strapi para os testes
+      strapi:
+        image: strapi-app:local
+        ports:
+          - 1337:1337
+        env:
+          NODE_ENV: test
+          DATABASE_FILENAME: .tmp/data.db
+        # Dá tempo para o Strapi iniciar
+        options: >-
+          --health-cmd "wget --no-verbose --tries=1 --spider http://localhost:1337/ || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'pnpm'
+    
+    - name: Install pnpm
+      run: npm install -g pnpm
+    
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+    
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps
+    
+    - name: Run E2E Tests
+      run: pnpm test:e2e
+      env:
+        STRAPI_URL: http://localhost:1337
