@@ -32,8 +32,7 @@ jobs:
 
     - name: Start Strapi in background
       run: |
-        pnpm start &
-        echo $! > strapi.pid
+        pnpm start
       env:
         NODE_ENV: test
         DATABASE_FILENAME: .tmp/data.db
@@ -42,9 +41,6 @@ jobs:
         ADMIN_JWT_SECRET: test
         TRANSFER_TOKEN_SALT: test
         JWT_SECRET: test
-
-    - name: Wait for Strapi to be ready
-      run: pnpm wait-on http://localhost:1337
 
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
