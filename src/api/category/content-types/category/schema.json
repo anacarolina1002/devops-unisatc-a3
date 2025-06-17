@@ -15,7 +15,7 @@
     "name": {
       "type": "string"
     },
-    "slug": {
+    "slung": {
       "type": "uid"
     },
     "articles": {
