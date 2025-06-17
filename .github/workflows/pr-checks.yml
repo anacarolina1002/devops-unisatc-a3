@@ -34,7 +34,6 @@ jobs:
       run: |
         pnpm start
       env:
-        NODE_ENV: test
         DATABASE_FILENAME: .tmp/data.db
         APP_KEYS: test
         API_TOKEN_SALT: test
