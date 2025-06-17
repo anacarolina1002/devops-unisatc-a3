@@ -24,33 +24,16 @@ jobs:
         node-version: '18'
         cache: 'pnpm'
 
-    - name: Set up Docker
-      run: docker --version
-
-    - name: Build Strapi Docker image
-      run: docker build -t strapi-app:test .
-
-    - name: Run Strapi container
-      run: |
-        docker run -d \
-          --name strapi \
-          -p 1337:1337 \
-          -e NODE_ENV=test \
-          -e DATABASE_FILENAME=.tmp/data.db \
-          -e APP_KEYS=test \
-          -e API_TOKEN_SALT=test \
-          -e ADMIN_JWT_SECRET=test \
-          -e TRANSFER_TOKEN_SALT=test \
-          -e JWT_SECRET=test \
-          strapi-app:test
-
-    - name: Wait for Strapi to be ready
-      run: |
-        timeout 180 bash -c 'until curl -s http://localhost:1337/; do sleep 5; done' || \
-          (docker logs strapi && exit 1)
-
     - name: Install dependencies
       run: pnpm install --frozen-lockfile
+
+    - name: Build Strapi app
+      run: pnpm build
+
+    - name: Start Strapi (in background)
+      run: |
+        pnpm start &
+        npx wait-on http://localhost:1337
 
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
