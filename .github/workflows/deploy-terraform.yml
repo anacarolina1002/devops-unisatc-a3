@@ -39,6 +39,11 @@ jobs:
         run: terraform plan -input=false -out=tfplan
         env:
           ARM_ACCESS_KEY: ${{ secrets.TF_STATE_KEY }}
+          TF_VAR_app_keys: ${{ secrets.APP_KEYS }}
+          TF_VAR_api_token_salt: ${{ secrets.API_TOKEN_SALT }}
+          TF_VAR_admin_jwt_secret: ${{ secrets.ADMIN_JWT_SECRET }}
+          TF_VAR_dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          TF_VAR_dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Terraform Apply
         run: terraform apply -input=false -auto-approve tfplan
