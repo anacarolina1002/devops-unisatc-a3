@@ -34,6 +34,13 @@ jobs:
       run: |
         pnpm start &
         npx wait-on http://localhost:1337
+      env:
+        DATABASE_FILENAME: .tmp/data.db
+        APP_KEYS: test
+        API_TOKEN_SALT: test
+        ADMIN_JWT_SECRET: test
+        TRANSFER_TOKEN_SALT: test
+        JWT_SECRET: test
 
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
